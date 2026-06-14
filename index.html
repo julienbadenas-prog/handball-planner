@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur de séances Handball</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    .result { margin-top: 30px; }
+    .bloc { margin-bottom: 15px; padding: 10px; border-radius: 6px; background: #eef; }
+    .bloc h3 { margin: 0 0 5px 0; }
+    .small { font-size: 12px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Générateur de séances Handball</h1>
+
+    <label>Thème (texte libre)</label>
+    <textarea id="theme" rows="2" placeholder="Ex : grand espace et montée de balle, défense 1-5, duels 1c1, tir en course..."></textarea>
+
+    <label>Catégorie</label>
+    <select id="categorie">
+      <option value="Babyhand">Babyhand</option>
+      <option value="U9">U9</option>
+      <option value="U11">U11</option>
+      <option value="U13">U13</option>
+      <option value="U15">U15</option>
+      <option value="U18">U18</option>
+      <option value="Seniors">Seniors</option>
+    </select>
+
+    <label>Niveau</label>
+    <select id="niveau">
+      <option value="Débutant">Débutant</option>
+      <option value="Intermédiaire">Intermédiaire</option>
+      <option value="Confirmé">Confirmé</option>
+      <option value="Performance">Performance</option>
+      <option value="Pro">Pro</option>
+    </select>
+
+    <label>Durée de la séance (minutes, entre 60 et 120)</label>
+    <input type="number" id="duree" value="90" min="60" max="120">
+
+    <label>Nombre de joueurs</label>
+    <input type="number" id="joueurs" value="12" min="4" max="20">
+
+    <label>Nombre de gardiens</label>
+    <input type="number" id="gardiens" value="1" min="0" max="4">
+
+    <button onclick="genererSeance()">Générer la séance</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    // Mini base d'exercices de démo — à enrichir
+    const exercices = [
+      // ÉCHAUFFEMENTS
+      {
+        id: 1,
+        titre: "Jeu de passes en mouvement sur tout le terrain",
+        type: "echauffement",
+        categories: ["U11","U13","U15","U18","Seniors"],
+        niveaux: ["Débutant","Intermédiaire","Confirmé"],
+        tags: ["grand_espace","montee_de_balle","general"],
+        nbMin: 8, nbMax: 20
+      },
+      {
+        id: 2,
+        titre: "Parcours moteur avec ballon (sauts, slalom, appuis)",
+        type: "echauffement",
+        categories: ["Babyhand","U9","U11","U13"],
+        niveaux: ["Débutant","Intermédiaire"],
+        tags: ["general"],
+        nbMin: 6, nbMax: 20
+      },
+
+      // TECHNIQUE / FONDAMENTAUX
+      {
+        id: 3,
+        titre: "Montée de balle sans opposition en 2 groupes",
+        type: "technique",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé"],
+        tags: ["grand_espace","montee_de_balle"],
+        nbMin: 8, nbMax: 16
+      },
+      {
+        id: 4,
+        titre: "Passes en mouvement par 3 avec changement de direction",
+        type: "technique",
+        categories: ["U11","U13","U15","U18","Seniors"],
+        niveaux: ["Débutant","Intermédiaire","Confirmé"],
+        tags: ["general"],
+        nbMin: 6, nbMax: 18
+      },
+      {
+        id: 5,
+        titre: "Tir en course après passe et va",
+        type: "technique",
+        categories: ["U11","U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé"],
+        tags: ["tir_course","duel_1c1"],
+        nbMin: 6, nbMax: 16
+      },
+
+      // THÈME PRINCIPAL
+      {
+        id: 6,
+        titre: "3c2 grand espace avec départ gardien",
+        type: "theme",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé","Performance"],
+        tags: ["grand_espace","montee_de_balle","transition"],
+        nbMin: 8, nbMax: 14
+      },
+      {
+        id: 7,
+        titre: "2c2 duels 1c1 avec aide défensive",
+        type: "theme",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé"],
+        tags: ["duel_1c1"],
+        nbMin: 6, nbMax: 12
+      },
+      {
+        id: 8,
+        titre: "Bloc central défense 1-5 vs 3 arrières",
+        type: "theme",
+        categories: ["U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé","Performance"],
+        tags: ["defense_1_5"],
+        nbMin: 8, nbMax: 14
+      },
+
+      // JEU / OPPOSITION
+      {
+        id: 9,
+        titre: "5c5 à thème : chaque récupération doit être jouée en montée de balle",
+        type: "jeu",
+        categories: ["U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé","Performance"],
+        tags: ["grand_espace","montee_de_balle"],
+        nbMin: 10, nbMax: 14
+      },
+      {
+        id: 10,
+        titre: "4c4 avec obligation de duel 1c1 avant tir",
+        type: "jeu",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé"],
+        tags: ["duel_1c1","tir_course"],
+        nbMin: 8, nbMax: 12
+      },
+
+      // RETOUR AU CALME
+      {
+        id: 11,
+        titre: "Étirements + débrief collectif",
+        type: "retour_calme",
+        categories: ["Babyhand","U9","U11","U13","U15","U18","Seniors"],
+        niveaux: ["Débutant","Intermédiaire","Confirmé","Performance","Pro"],
+        tags: ["general"],
+        nbMin: 4, nbMax: 20
+      },
+
+      // SPÉCIFIQUE GARDIENS
+      {
+        id: 12,
+        titre: "Échauffement gardien : déplacements sur ligne + tirs cadrés à 6m",
+        type: "specifique_gardien",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Débutant","Intermédiaire","Confirmé","Performance"],
+        tags: ["gardien"],
+        nbMin: 1, nbMax: 4
+      },
+      {
+        id: 13,
+        titre: "Duels gardien / tireur en grand espace (1c0 puis 1c1)",
+        type: "specifique_gardien",
+        categories: ["U13","U15","U18","Seniors"],
+        niveaux: ["Intermédiaire","Confirmé","Performance"],
+        tags: ["gardien","grand_espace"],
+        nbMin: 1, nbMax: 4
+      }
+    ];
+
+    function extraireTags(theme) {
+      theme = theme.toLowerCase();
+      const tags = [];
+      if (theme.includes("grand espace")) tags.push("grand_espace");
+      if (theme.includes("montée de balle") || theme.includes("montee de balle")) tags.push("montee_de_balle");
+      if (theme.includes("repli")) tags.push("repli_defensif");
+      if (theme.includes("defense 1-5") || theme.includes("défense 1-5")) tags.push("defense_1_5");
+      if (theme.includes("defense 0-6") || theme.includes("défense 0-6")) tags.push("defense_0_6");
+      if (theme.includes("duel") || theme.includes("1c1")) tags.push("duel_1c1");
+      if (theme.includes("tir en course")) tags.push("tir_course");
+      if (theme.includes("gardien")) tags.push("gardien");
+      if (tags.length === 0) tags.push("general");
+      return tags;
+    }
+
+    function construireSquelette(duree, nbGardiens) {
+      const blocs = [];
+      if (duree <= 70) {
+        blocs.push(["echauffement", 10]);
+        if (nbGardiens > 0) blocs.push(["specifique_gardien", 10]);
+        blocs.push(["technique", 15]);
+        blocs.push(["theme", 20]);
+        blocs.push(["jeu", 10]);
+        blocs.push(["retour_calme", 5]);
+      } else if (duree <= 90) {
+        blocs.push(["echauffement", 15]);
+        if (nbGardiens > 0) blocs.push(["specifique_gardien", 10]);
+        blocs.push(["technique", 20]);
+        blocs.push(["theme", 30]);
+        blocs.push(["jeu", 15]);
+        blocs.push(["retour_calme", 10]);
+      } else if (duree <= 105) {
+        blocs.push(["echauffement", 15]);
+        if (nbGardiens > 0) blocs.push(["specifique_gardien", 15]);
+        blocs.push(["technique", 20]);
+        blocs.push(["theme", 30]);
+        blocs.push(["jeu", 20]);
+        blocs.push(["retour_calme", 10]);
+      } else {
+        blocs.push(["echauffement", 20]);
+        if (nbGardiens > 0) blocs.push(["specifique_gardien", 15]);
+        blocs.push(["technique", 20]);
+        blocs.push(["theme", 40]);
+        blocs.push(["jeu", 20]);
+        blocs.push(["retour_calme", 10]);
+      }
+      return blocs;
+    }
+
+    function filtrerExercices(typeBloc, categorie, niveau, nbJoueurs, tags) {
+      return exercices.filter(ex => {
+        if (ex.type !== typeBloc) return false;
+        if (!ex.categories.includes(categorie)) return false;
+        if (!ex.niveaux.includes(niveau)) return false;
+        if (typeBloc !== "specifique_gardien") {
+          if (nbJoueurs < ex.nbMin || nbJoueurs > ex.nbMax) return false;
+        }
+        if (typeBloc === "theme" || typeBloc === "technique" || typeBloc === "jeu") {
+          return tags.some(t => ex.tags.includes(t));
+        }
+        return true;
+      });
+    }
+
+    function choisirExercice(candidats) {
+      if (candidats.length === 0) return null;
+      return candidats[Math.floor(Math.random() * candidats.length)];
+    }
+
+    function genererSeance() {
+      const theme = document.getElementById("theme").value;
+      const categorie = document.getElementById("categorie").value;
+      const niveau = document.getElementById("niveau").value;
+      const duree = parseInt(document.getElementById("duree").value, 10);
+      const joueurs = parseInt(document.getElementById("joueurs").value, 10);
+      const gardiens = parseInt(document.getElementById("gardiens").value, 10);
+
+      const tags = extraireTags(theme);
+      const squelette = construireSquelette(duree, gardiens);
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      let total = 0;
+      const seance = [];
+
+      squelette.forEach(([typeBloc, dureeBloc]) => {
+        const candidats = filtrerExercices(typeBloc, categorie, niveau, joueurs, tags);
+        const ex = choisirExercice(candidats);
+        total += dureeBloc;
+        seance.push({ type: typeBloc, duree: dureeBloc, exercice: ex });
+      });
+
+      const header = document.createElement("div");
+      header.innerHTML = `<p><strong>Durée totale proposée :</strong> ${total} min (demandé : ${duree} min)</p>
+                          <p class="small">Thème : ${theme || "(non renseigné)"} | Catégorie : ${categorie} | Niveau : ${niveau} | Joueurs : ${joueurs} | Gardiens : ${gardiens}</p>`;
+      resultDiv.appendChild(header);
+
+      seance.forEach(bloc => {
+        const div = document.createElement("div");
+        div.className = "bloc";
+        const labelType = {
+          "echauffement": "Échauffement",
+          "technique": "Technique / fondamentaux",
+          "theme": "Thème principal",
+          "jeu": "Jeu / opposition",
+          "retour_calme": "Retour au calme",
+          "specifique_gardien": "Spécifique gardiens"
+        }[bloc.type] || bloc.type;
+
+        div.innerHTML = `
+          <h3>${labelType} – ${bloc.duree} min</h3>
+          <p>${bloc.exercice ? bloc.exercice.titre : "<em>Aucun exercice trouvé pour ce bloc (à compléter dans la base).</em>"}</p>
+        `;
+        resultDiv.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>

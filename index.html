@@ -3,127 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Handball Planner - Générateur de Séances</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Handball Planner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    button { background: #FF6B35; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
+    button:hover { background: #e55a25; }
+    .result { margin-top: 30px; padding: 15px; background: #f9f9f9; border-left: 4px solid #FF6B35; border-radius: 4px; }
+    .bloc { background: white; border-left: 4px solid #FF6B35; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .bloc h3 { margin-bottom: 10px; color: #333; }
+    .bloc p { color: #666; margin: 5px 0; }
+    .error { color: red; }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-content">
-        <h1>🏐 Handball Planner</h1>
-        <p class="subtitle">Générateur intelligent de séances d'entraînement</p>
+  <div class="container">
+    <h1>🏐 Handball Planner</h1>
+    <p>Générateur de séances d'entraînement</p>
+
+    <div class="form-group">
+      <label>Thème:</label>
+      <textarea id="theme" placeholder="Ex: grand espace, défense 1-5, duels..." rows="2"></textarea>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div class="form-group">
+        <label>Catégorie:</label>
+        <select id="categorie">
+          <option>U13</option>
+          <option>U15</option>
+          <option>U18</option>
+          <option>Seniors</option>
+        </select>
       </div>
-    </header>
+      <div class="form-group">
+        <label>Niveau:</label>
+        <select id="niveau">
+          <option>Débutant</option>
+          <option>Intermédiaire</option>
+          <option>Confirmé</option>
+        </select>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Form Section -->
-      <section class="form-section">
-        <div class="form-card">
-          <h2>Configuration de votre séance</h2>
-          
-          <div class="form-group">
-            <label for="theme">🎯 Thème de la séance</label>
-            <textarea 
-              id="theme" 
-              rows="3" 
-              placeholder="Ex: grand espace et montée de balle, défense 1-5, duels 1c1, tir en course..."
-              class="textarea-input"
-            ></textarea>
-          </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+      <div class="form-group">
+        <label>Durée (min):</label>
+        <input type="number" id="duree" value="90" min="60" max="120">
+      </div>
+      <div class="form-group">
+        <label>Joueurs:</label>
+        <input type="number" id="joueurs" value="12" min="4" max="20">
+      </div>
+      <div class="form-group">
+        <label>Gardiens:</label>
+        <input type="number" id="gardiens" value="1" min="0" max="4">
+      </div>
+    </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="categorie">👥 Catégorie</label>
-              <select id="categorie" class="select-input">
-                <option value="Babyhand">Babyhand</option>
-                <option value="U9">U9</option>
-                <option value="U11">U11</option>
-                <option value="U13">U13</option>
-                <option value="U15">U15</option>
-                <option value="U18">U18</option>
-                <option value="Seniors">Seniors</option>
-              </select>
-            </div>
+    <button onclick="genererSeance()">✨ Générer la séance</button>
 
-            <div class="form-group">
-              <label for="niveau">📊 Niveau</label>
-              <select id="niveau" class="select-input">
-                <option value="Débutant">Débutant</option>
-                <option value="Intermédiaire">Intermédiaire</option>
-                <option value="Confirmé">Confirmé</option>
-                <option value="Performance">Performance</option>
-                <option value="Pro">Pro</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="duree">⏱️ Durée (min)</label>
-              <input 
-                type="number" 
-                id="duree" 
-                value="90" 
-                min="60" 
-                max="120"
-                class="number-input"
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="joueurs">👕 Joueurs</label>
-              <input 
-                type="number" 
-                id="joueurs" 
-                value="12" 
-                min="4" 
-                max="20"
-                class="number-input"
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="gardiens">🧤 Gardiens</label>
-              <input 
-                type="number" 
-                id="gardiens" 
-                value="1" 
-                min="0" 
-                max="4"
-                class="number-input"
-              >
-            </div>
-          </div>
-
-          <button onclick="genererSeance()" class="btn-generate">
-            ✨ Générer la séance
-          </button>
-        </div>
-      </section>
-
-      <!-- Results Section -->
-      <section class="results-section" id="resultsSection" style="display:none;">
-        <div class="results-header">
-          <h2>Votre séance d'entraînement</h2>
-          <button onclick="telechargerPDF()" class="btn-download">📥 Télécharger PDF</button>
-        </div>
-        
-        <div id="result" class="result-container"></div>
-
-        <button onclick="genererSeance()" class="btn-new-session">
-          🔄 Générer une nouvelle séance
-        </button>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>© 2026 Handball Planner | Créé pour les coachs passionnés 🏐</p>
-    </footer>
+    <div id="result"></div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    const exercices = [
+      { id: 1, titre: "Passes en mouvement", type: "echauffement", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Débutant", "Intermédiaire", "Confirmé"], tags: ["general"], nbMin: 8, nbMax: 20 },
+      { id: 2, titre: "Tir à 9m - Série de 10", type: "technique", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Débutant", "Intermédiaire", "Confirmé"], tags: ["tir"], nbMin: 6, nbMax: 16 },
+      { id: 3, titre: "3c2 grand espace", type: "theme", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Intermédiaire", "Confirmé"], tags: ["grand_espace"], nbMin: 8, nbMax: 14 },
+      { id: 4, titre: "2c2 duels 1c1", type: "theme", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Intermédiaire", "Confirmé"], tags: ["duel"], nbMin: 6, nbMax: 12 },
+      { id: 5, titre: "5c5 complet", type: "jeu", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Intermédiaire", "Confirmé"], tags: ["general"], nbMin: 10, nbMax: 14 },
+      { id: 6, titre: "4c4 rapide", type: "jeu", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Débutant", "Intermédiaire"], tags: ["general"], nbMin: 8, nbMax: 12 },
+      { id: 7, titre: "Étirements + débrief", type: "retour_calme", categories: ["U13", "U15", "U18", "Seniors"], niveaux: ["Débutant", "Intermédiaire", "Confirmé"], tags: ["general"], nbMin: 5, nbMax: 15 }
+    ];
+
+    function genererSeance() {
+      const theme = document.getElementById("theme").value.toLowerCase();
+      const categorie = document.getElementById("categorie").value;
+      const niveau = document.getElementById("niveau").value;
+      const duree = parseInt(document.getElementById("duree").value);
+      const joueurs = parseInt(document.getElementById("joueurs").value);
+      const gardiens = parseInt(document.getElementById("gardiens").value);
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      const blocs = [
+        { type: "echauffement", duree: 15 },
+        { type: "technique", duree: 20 },
+        { type: "theme", duree: 30 },
+        { type: "jeu", duree: 20 },
+        { type: "retour_calme", duree: 10 }
+      ];
+
+      const header = document.createElement("div");
+      header.className = "result";
+      header.innerHTML = `<strong>Durée: ${duree} min | Catégorie: ${categorie} | Niveau: ${niveau} | Joueurs: ${joueurs}</strong>`;
+      resultDiv.appendChild(header);
+
+      let totalDuree = 0;
+      blocs.forEach(bloc => {
+        const candidats = exercices.filter(ex => 
+          ex.type === bloc.type && 
+          ex.categories.includes(categorie) && 
+          ex.niveaux.includes(niveau) &&
+          joueurs >= ex.nbMin && joueurs <= ex.nbMax
+        );
+
+        const exo = candidats.length > 0 ? candidats[Math.floor(Math.random() * candidats.length)] : null;
+        totalDuree += bloc.duree;
+
+        const div = document.createElement("div");
+        div.className = "bloc";
+        div.innerHTML = `
+          <h3>${bloc.type.toUpperCase()} - ${bloc.duree} min</h3>
+          <p>${exo ? exo.titre : '<span class="error">Pas d\'exercice trouvé</span>'}</p>
+        `;
+        resultDiv.appendChild(div);
+      });
+
+      const summary = document.createElement("div");
+      summary.className = "result";
+      summary.innerHTML = `<strong>✅ Séance générée: ${totalDuree} min</strong>`;
+      resultDiv.appendChild(summary);
+    }
+  </script>
 </body>
 </html>
